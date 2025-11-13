@@ -1,9 +1,6 @@
 # Image Classification Trainer
 
 A professional desktop application for training deep learning **image classification** models with an intuitive, modern GUI.
-
-[Features](#features) • [Installation](#installation) • [Quick Start](#quick-start) • [Documentation](#documentation) • [Contributing](#contributing)
-
 ---
 
 ## 📖 Overview
@@ -54,21 +51,6 @@ A professional desktop application for training deep learning **image classifica
 * Save complete project state (paths + hyperparams)
 * Resume from checkpoints
 * Versioned, timestamped run folders & auto reports
-
----
-
-## 🖼️ Screenshots
-
-> Place these images in `docs/` with the same names.
-
-<img src="docs/screenshot_main.png" alt="Main Interface" width="800"><br>
-*Define classes, configure hyperparameters, and manage your project.*
-
-<img src="docs/screenshot_training.png" alt="Training" width="800"><br>
-*Live metrics with accuracy/loss curves.*
-
-<img src="docs/screenshot_results.png" alt="Results" width="800"><br>
-*Confusion matrix and detailed metrics.*
 
 ---
 
@@ -203,28 +185,28 @@ my_data/
 Image-Classifier-Trainer-CNN/
 ├── launch.py                 # Environment bootstrapper + app launcher
 ├── trainer/
-│   ├── main.py               # Application entry
-│   ├── constants.py          # App constants
-│   ├── config.py             # Config dataclasses
+│   ├── main.py               
+│   ├── constants.py          
+│   ├── config.py             
 │   ├── ml/
-│   │   ├── training.py       # Background training worker
-│   │   ├── model_builder.py  # Build Keras models
-│   │   ├── dataset.py        # Loading & preprocessing
-│   │   ├── augmentations.py  # MixUp, CutMix, etc.
-│   │   └── metrics.py        # Evaluation metrics
+│   │   ├── training.py       
+│   │   ├── model_builder.py  
+│   │   ├── dataset.py        
+│   │   ├── augmentations.py  
+│   │   └── metrics.py        
 │   ├── gui/
-│   │   ├── main_window.py    # Main window
-│   │   ├── left_panel.py     # Project & model config
-│   │   ├── center_panel.py   # Control & results
-│   │   ├── right_panel.py    # Advanced settings & logs
-│   │   ├── plot_widgets.py   # Embedded Matplotlib charts
-│   │   └── dialogs.py        # Dialog utilities
+│   │   ├── main_window.py    
+│   │   ├── left_panel.py     
+│   │   ├── center_panel.py   
+│   │   ├── right_panel.py    
+│   │   ├── plot_widgets.py   
+│   │   └── dialogs.py        
 │   └── utils/
-│       ├── qt_shim.py        # PyQt5/6 compatibility
-│       ├── system.py         # System checks, disk space, etc.
+│       ├── qt_shim.py        
+│       ├── system.py         
 │       └── reproducibility.py# Seeds & determinism
 ├── assets/
-│   └── style.qss             # Dark theme stylesheet
+│   └── style.qss             
 ├── requirements.txt
 ├── LICENSE
 ├── .gitignore
