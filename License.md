@@ -29,8 +29,7 @@ selecting a given model.
 
 - Keras/TensorFlow models: downloaded via Keras Applications at runtime.
 - TorchVision models: downloaded via TorchVision weight enums at runtime.
-- Optional external checkpoints: you may point the app to a URL; if marked
-  as research-only / non-commercial, set `ACK_NONCOMMERCIAL=1` before running.
+
 
 No datasets are included. This project is for **non-commercial/research** use.
 
