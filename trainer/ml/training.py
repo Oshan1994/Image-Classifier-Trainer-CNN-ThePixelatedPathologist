@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 
 from ..utils.qt_shim import QtCore
 from ..utils.system import validate_split_fractions, check_disk_space
-# Try to import new functions, fallback to old behavior if not available
+
 try:
     from ..utils.system import adjust_split_fractions, MIN_TEST_FRACTION
     HAS_ENHANCED_SPLIT_VALIDATION = True
@@ -97,12 +97,12 @@ class TrainingWorker(QtCore.QThread):
             cfg = self.config
             set_global_seed(cfg.get('seed', 42))
 
-            # Validate configuration
+            
             valid, msg = validate_split_fractions(cfg['train_frac'], cfg['val_frac'])
             if not valid:
                 raise ValueError(f"Invalid split configuration: {msg}")
 
-            # Check disk space
+            
             outdir = Path(cfg['project_dir'])
             has_space, free_gb = check_disk_space(outdir)
             if not has_space:
@@ -141,11 +141,11 @@ class TrainingWorker(QtCore.QThread):
             logger.info(f"Dataset: {len(filepaths)} images, {len(class_names)} classes")
             time.sleep(0.05)
 
-            # Validate data splits - FIXED: Using consistent MIN_TEST_FRACTION
+            
             train_frac = cfg['train_frac']
             val_frac = cfg['val_frac']
             
-            # Validate split fractions
+            
             valid, msg = validate_split_fractions(train_frac, val_frac)
             if not valid:
                 if HAS_ENHANCED_SPLIT_VALIDATION:
@@ -203,13 +203,13 @@ class TrainingWorker(QtCore.QThread):
             num_classes = len(class_names)
             aug_cfg = cfg.get('augmentation', {})
             
-            # CRITICAL: Check if MixUp/CutMix are actually enabled
-            # Sometimes config has the keys but they're False or empty
+            
+            
             mixup_enabled = bool(aug_cfg.get('mixup', False) and aug_cfg.get('enabled', False))
             cutmix_enabled = bool(aug_cfg.get('cutmix', False) and aug_cfg.get('enabled', False))
             do_soft = mixup_enabled or cutmix_enabled
             
-            # DEBUG: Log what's being used
+            
             self.append_log.emit(f"🔍 Augmentation config: enabled={aug_cfg.get('enabled')}, mixup={aug_cfg.get('mixup')}, cutmix={aug_cfg.get('cutmix')}")
             self.append_log.emit(f"🔍 Will use soft labels (one-hot): {do_soft}")
 
@@ -236,12 +236,12 @@ class TrainingWorker(QtCore.QThread):
             continue_path = cfg.get('continue_model_path', "").strip()
             reg_enabled = bool(cfg.get('reg_enabled', False))
 
-            # Learning rates
+            
             base_lr = float(cfg.get('lr', 1e-4))
             warmup_lr = float(cfg.get('warmup_lr', base_lr)) if reg_enabled else base_lr
             finetune_lr = float(cfg.get('finetune_lr', max(base_lr * 0.1, 1e-5))) if reg_enabled else base_lr
 
-            # Dropout and label smoothing
+            
             dropout_rate = float(cfg.get('dropout', 0.50)) if reg_enabled else 0.35
             label_smoothing = float(cfg.get('label_smoothing', 0.05)) if reg_enabled else 0.0
             unfreeze_scope = str(cfg.get('unfreeze_scope', 'top_block' if reg_enabled else 'none'))
@@ -275,11 +275,6 @@ class TrainingWorker(QtCore.QThread):
             self.append_log.emit("✓ Model loaded successfully.")
             time.sleep(0.05)
 
-            # Loss function selection - FIXED
-            # Key decisions:
-            # 1. MixUp/CutMix produce one-hot labels → use CategoricalCrossentropy
-            # 2. Label smoothing with integer labels → use SparseCategoricalCrossentropy
-            # 3. No augmentation, no smoothing → use 'sparse_categorical_crossentropy' (string)
             
             if do_soft:
                 # MixUp/CutMix enabled: labels will be one-hot encoded
@@ -298,14 +293,14 @@ class TrainingWorker(QtCore.QThread):
                 loss_fn = 'sparse_categorical_crossentropy'
                 self.append_log.emit("Using sparse_categorical_crossentropy (standard)")
 
-            # Optimizer with gradient clipping (warm-up)
+            
             optimizer = tf.keras.optimizers.Adam(
                 learning_rate=warmup_lr,
                 clipnorm=1.0
             )
             model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
             
-            # Log model summary (truncated for large models)
+            
             summary_lines = []
             model.summary(print_fn=lambda x: summary_lines.append(x))
             
@@ -340,12 +335,12 @@ class TrainingWorker(QtCore.QThread):
             has_val = val_ds is not None
             total_epochs = cfg['epochs']
             
-            # Calculate warmup epochs
+            
             warmup_epochs = max(1, int(total_epochs * WARM_UP_FRACTION))
             if warmup_epochs >= total_epochs:
                 warmup_epochs = 0
 
-            # --- callbacks ---
+            
             callbacks = [
                 tf.keras.callbacks.ReduceLROnPlateau(
                     monitor='val_loss' if has_val else 'loss',
@@ -385,7 +380,7 @@ class TrainingWorker(QtCore.QThread):
             logger.info(f'Starting training: {total_epochs} epochs, warmup={warmup_epochs}')
             time.sleep(0.1)
 
-            # ---------------- WARM-UP (frozen backbone) ----------------
+            
             history_wu = None
             if warmup_epochs > 0:
                 self.append_log.emit(f'Warm-up with frozen backbone for {warmup_epochs} epoch(s)...')
@@ -400,13 +395,13 @@ class TrainingWorker(QtCore.QThread):
 
             remaining_epochs = max(total_epochs - warmup_epochs, 0)
             
-            # Combine history
+            
             full_history = {}
             if history_wu:
                 full_history = history_wu.history.copy()
 
             if remaining_epochs > 0 and cfg.get('finetune', False):
-                # ---------------- UNFREEZE (fine-tune) ----------------
+                
                 self.append_log.emit('Unfreezing backbone for fine-tuning...')
                 base = None
                 for lyr in model.layers:
@@ -458,7 +453,7 @@ class TrainingWorker(QtCore.QThread):
             
             self.append_log.emit('Training complete. Saving final model...')
             
-            # Save final model as backup
+            
             try:
                 model.save(ckpt_last_path)
                 self.append_log.emit(f'✓ Final model saved: {Path(ckpt_last_path).name}')
@@ -467,7 +462,7 @@ class TrainingWorker(QtCore.QThread):
             
             self.append_log.emit('Evaluating on test set using *best* model...')
             
-            # Load the *best* model for evaluation
+           
             if Path(ckpt_best_path).exists():
                 model = tf.keras.models.load_model(ckpt_best_path, compile=False)
                 self.append_log.emit(f'✓ Loaded best model from: {Path(ckpt_best_path).name}')
@@ -495,7 +490,7 @@ class TrainingWorker(QtCore.QThread):
                 self.append_log.emit(f"⚠ Warning: Could not save metadata files: {e}")
                 logger.error(f"Failed to save metadata: {e}")
 
-            # Generate README
+           
             self.append_log.emit('Saving training summary...')
             try:
                 readme_path = outdir / 'README.txt'
