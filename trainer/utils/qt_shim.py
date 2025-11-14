@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# -------------------- Qt compatibility shim --------------------
+
 QT_API = None
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
@@ -37,7 +37,6 @@ def set_section_resize_mode(header: 'QtWidgets.QHeaderView', section: int, mode_
         mode_enum = getattr(QtWidgets.QHeaderView, mode_str)
         header.setSectionResizeMode(section, mode_enum)
 
-# --- Matplotlib for plotting (robust, with fallbacks) ---
 MATPLOTLIB_OK = False
 HAS_SEABORN = False
 try:
