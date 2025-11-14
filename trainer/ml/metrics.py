@@ -20,7 +20,6 @@ def compute_metrics(y_true: np.ndarray, y_prob: np.ndarray, class_names: List[st
     report = classification_report(y_true, y_pred, target_names=class_names, zero_division=0, output_dict=True)
     cm = confusion_matrix(y_true, y_pred)
     
-    # --- Existing AUC/Specificity ---
     try:
         if y_prob.shape[1] == 2:
             auc_score = roc_auc_score(y_true, y_prob[:, 1])
@@ -41,16 +40,15 @@ def compute_metrics(y_true: np.ndarray, y_prob: np.ndarray, class_names: List[st
         
     avg_specificity = float(np.mean(specificities)) if len(specificities) else 0.0
     
-    # --- NEW METRICS ---
+    
     kappa = cohen_kappa_score(y_true, y_pred)
     mcc = matthews_corrcoef(y_true, y_pred)
     loss = -1.0
     try:
-        # --- THIS IS THE FIX ---
-        # Clip probabilities to avoid log(0)
+        
         eps = 1e-15
         y_prob = np.clip(y_prob, eps, 1 - eps)
-        # --- END FIX ---
+        
         
         loss = log_loss(y_true, y_prob, labels=class_labels)
     except ValueError as e:
@@ -69,7 +67,7 @@ def compute_metrics(y_true: np.ndarray, y_prob: np.ndarray, class_names: List[st
             top_3_acc = top_k_accuracy_score(y_true, y_prob, k=3, labels=class_labels)
         except ValueError as e:
              logger.warning(f"Could not compute Top-3 Accuracy: {e}")
-    # --- END NEW METRICS ---
+    
 
     return {
         'accuracy': float(acc),
@@ -81,8 +79,6 @@ def compute_metrics(y_true: np.ndarray, y_prob: np.ndarray, class_names: List[st
         'auc_weighted': float(auc_score),
         'classification_report': report,
         'confusion_matrix': cm.tolist(),
-        
-        # --- NEW METRICS ADDED TO DICT ---
         'cohen_kappa': float(kappa),
         'matthews_corrcoef': float(mcc),
         'log_loss': float(loss),
