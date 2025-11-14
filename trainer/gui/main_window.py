@@ -79,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not base.exists():
             return out
         
-        # Load metrics once for this directory
+        
         metrics = {}
         metrics_file = base / "metrics.json"
         if metrics_file.exists():
@@ -89,7 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except:
                 pass
         
-        # Find all .keras and .h5 files
+        
         for ext in ["*.keras", "*.h5"]:
             for model_path in base.glob(ext):
                 # Create informative display name
@@ -112,20 +112,20 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.current_project_dir:
             proj_dir = Path(self.current_project_dir)
             
-            # Scan immediate sub-folders (for individual runs)
+            
             try:
                 for run_folder in proj_dir.iterdir():
                     if run_folder.is_dir():
                         run_models = self._scan_models_in_dir(run_folder)
                         
-                        # Add run-folder prefix to label
+                        
                         for display, path, metrics in run_models:
                             label = f"{run_folder.name}/{display}"
                             models.append((label, path))
             except OSError as e:
                 self.right_panel_widget.log.appendPlainText(f"Warning: Error scanning folders: {e}")
         
-        # Remove duplicates and sort
+        
         models = sorted(list(set(models)), key=lambda x: x[0])
         
         self.right_panel_widget.set_models_for_inference(models)
@@ -161,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loaded_models.clear()
         self._populate_inference_models()
         
-        # Clear visualization data
+        
         self.center_panel.compare_visualization.clear_visualization()
         
         logger.info("New project created")
@@ -235,7 +235,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.right_panel_widget.log.appendPlainText(f"Project loaded from: {path}")
             self._populate_inference_models()
             
-            # Load training histories for visualization
+            
             if self.current_project_dir:
                 try:
                     self.center_panel.compare_visualization.load_training_histories(
