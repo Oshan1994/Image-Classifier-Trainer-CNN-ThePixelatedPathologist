@@ -74,7 +74,7 @@ def collect_images_from_dirs(
     for idx, label in enumerate(class_names):
         class_file_count = 0
         
-        # Report progress for this class
+        
         if progress_callback:
             progress_callback(f"[{idx+1}/{total_classes}] Scanning class '{label}'...")
         
@@ -88,7 +88,7 @@ def collect_images_from_dirs(
             
             files_in_this_dir = 0
             
-            # Use rglob to find all matching files recursively
+            
             for f in d_path.rglob('*'):
                 if f.suffix.lower() in SUPPORTED_FORMATS:
                     filepaths.append(str(f))
@@ -96,25 +96,25 @@ def collect_images_from_dirs(
                     class_file_count += 1
                     files_in_this_dir += 1
                     
-                    # Report progress every 100 images to avoid spamming
+                    
                     if files_in_this_dir % 100 == 0 and progress_callback:
                         progress_callback(
                             f"  └─ Class '{label}': {class_file_count} images found (scanning...)"
                         )
             
-            # Report completion of this directory
+            
             if progress_callback and files_in_this_dir > 0:
                 dir_name = d_path.name if len(d_path.name) < 40 else d_path.name[:37] + "..."
                 progress_callback(
                     f"  ✓ {files_in_this_dir} images from '{dir_name}'"
                 )
         
-        # Final count for this class
+        
         logger.info(f"Class '{label}': {class_file_count} images found")
         if progress_callback:
             progress_callback(f"✓ Class '{label}': {class_file_count} images total")
         
-        # Validate minimum images per class
+        
         if class_file_count < MIN_IMAGES_PER_CLASS:
             raise ValueError(
                 f"Class '{label}' has only {class_file_count} images. "
@@ -122,13 +122,13 @@ def collect_images_from_dirs(
                 f"Please add more images or remove this class."
             )
     
-    # Sort for reproducibility
+    
     pairs = sorted(zip(filepaths, labels), key=lambda x: x[0])
     if pairs:
         filepaths, labels = zip(*pairs)
         filepaths, labels = list(filepaths), list(labels)
     
-    # Final summary
+    
     if progress_callback:
         progress_callback(f"✓ Collection complete: {len(filepaths)} total images from {len(class_names)} classes")
         
