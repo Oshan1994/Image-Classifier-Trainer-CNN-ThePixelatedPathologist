@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-"""
-Image Classification Trainer - Launcher & Bootstrapper
-
-This script ensures the correct Python 3.11 environment is used,
-creates a virtual environment, installs platform-specific dependencies,
-and then launches the main application.
-"""
-
 import os, sys, subprocess, shutil, platform, json
 from pathlib import Path
 
@@ -27,8 +18,6 @@ def run(cmd, env=None, check=True):
     return subprocess.run(cmd, shell=isinstance(cmd, str), check=check, env=env)
 
 def find_py311():
-    """Finds a Python 3.11 executable."""
-    # If we’re already on 3.11, keep it
     if sys.version_info[:2] == (3, 11):
         print(f"✅ Found Python 3.11 (current): {sys.executable}")
         return sys.executable
@@ -49,7 +38,7 @@ def find_py311():
         except Exception:
             pass
             
-    # Fallback to current Python (warn if not 3.11)
+
     if sys.version_info[:2] != (3, 11):
         print("⚠️  Python 3.11 not found. Using current interpreter:", sys.version.split()[0])
         print("    TensorFlow pins below are tested for 3.11. If you hit issues, please install Python 3.11.")
@@ -62,7 +51,6 @@ def venv_python(venv_dir: Path):
     return venv_dir / "bin" / "python"
 
 def ensure_venv():
-    """Ensures the venv exists and returns the path to its python."""
     py = find_py311()
     if not VENV_DIR.exists():
         print(f"📦 Creating virtual environment at: {VENV_DIR}")
@@ -72,16 +60,12 @@ def ensure_venv():
     return str(vp)
 
 def pip_install(vpy, pkgs):
-    """Installs packages into the venv."""
     run([vpy, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"])
     if pkgs:
         run([vpy, "-m", "pip", "install", *pkgs])
 
 def compute_requirements_for_platform():
-    """
-    Return a list of pip packages with versions that work well on 3.11.
-    We keep TensorFlow platform-specific to avoid conflicts.
-    """
+
     common = [
         "numpy<2.0",                # TF 2.16 compatible range
         "pandas>=2.1",
@@ -91,21 +75,21 @@ def compute_requirements_for_platform():
         "openpyxl>=3.1",            # For Excel export
     ]
     
-    # Qt: PyQt6 wheels are available for Win/macOS; many Linux distros prefer system Qt.
+    
     if IS_WINDOWS or IS_MAC:
         common += ["PyQt6>=6.6"]
     else:
-        # Linux: Try PyQt6; if fails, user may install system Qt or PySide6
+        
         common += ["PyQt6>=6.6"]
 
-    # TensorFlow
+    
     tf = []
     if IS_MAC and ("arm" in ARCH or "aarch64" in ARCH):
         # Apple Silicon
         print("🍏 Detected Apple Silicon. Installing tensorflow-macos.")
         tf = ["tensorflow-macos==2.16.2", "tensorflow-metal==1.1.0"]
     else:
-        # Windows, Linux, or macOS Intel
+        
         print("💻 Detected Intel/AMD/Linux. Installing standard tensorflow.")
         tf = ["tensorflow==2.16.2"]
 
@@ -117,7 +101,7 @@ def already_bootstrapped_flag():
 def main():
     vpy = ensure_venv()
 
-    # Install deps only once (speedy subsequent runs)
+    
     if not already_bootstrapped_flag().exists():
         print("🔧 Installing dependencies for your platform…")
         pkgs = compute_requirements_for_platform()
@@ -126,7 +110,7 @@ def main():
     else:
         print("✅ Dependencies already installed (cached).")
 
-    # Show versions
+    
     print("--- Environment Check ---")
     run([vpy, "-c", "import sys, tensorflow as tf, numpy; print(f'Python: {sys.version.split()[0]}'); print(f'TF:     {tf.__version__}'); print(f'NumPy:  {numpy.__version__}')"])
     print("-------------------------")
