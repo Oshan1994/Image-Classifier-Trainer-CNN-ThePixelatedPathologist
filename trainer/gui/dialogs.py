@@ -45,14 +45,7 @@ def ensure_pretrained_weights(parent, model_name: str) -> bool:
             QtCore.QMetaObject.invokeMethod(dlg, "done", Qt.ConnectionType.QueuedConnection,
                                             QtCore.Q_ARG(int, 1 if ok[0] else 0))
 
-    # The QThread object is parented to 'parent' (the MainWindow),
-    # which correctly manages its lifetime.
-    worker = QtCore.QThread(parent)
-
-    # --- REMOVED THESE TWO LINES ---
-    # obj = QtCore.QObject()
-    # obj.moveToThread(worker)
-    # -------------------------------
+  
 
     worker.started.connect(_build)
     
@@ -74,9 +67,7 @@ def ensure_pretrained_weights(parent, model_name: str) -> bool:
         QtWidgets.QMessageBox.critical(parent, "Model Loading Failed",
                                      f"Failed to load {model_name}:\n{error_msg[0]}")
     
-    # If we are here, the thread called dlg.done()
-    # We still wait() to ensure the thread has fully terminated
-    # before proceeding.
+  
     worker.wait()
     return bool(ok[0])
 
