@@ -5,8 +5,7 @@ from typing import Tuple
 
 logger = logging.getLogger(__name__)
 
-# CRITICAL CONSTANT: Minimum test split fraction (5%)
-# This is the single source of truth for test split validation
+
 MIN_TEST_FRACTION = 0.05
 
 def check_disk_space(path: Path, required_gb: float = 5.0) -> Tuple[bool, float]:
@@ -90,11 +89,11 @@ def adjust_split_fractions(train_frac: float, val_frac: float) -> Tuple[float, f
     Returns:
         Tuple of (adjusted_train, adjusted_val, adjusted_test)
     """
-    # Ensure we have at least MIN_TEST_FRACTION for test
+    
     max_train_val = 1.0 - MIN_TEST_FRACTION
     
     if train_frac + val_frac > max_train_val:
-        # Proportionally reduce train and val to fit
+        
         total = train_frac + val_frac
         scale = max_train_val / total
         train_frac = train_frac * scale
@@ -107,7 +106,7 @@ def adjust_split_fractions(train_frac: float, val_frac: float) -> Tuple[float, f
     
     test_frac = 1.0 - train_frac - val_frac
     
-    # Final sanity check
+    
     if test_frac < MIN_TEST_FRACTION:
         test_frac = MIN_TEST_FRACTION
         val_frac = max(0.0, 1.0 - train_frac - test_frac)
