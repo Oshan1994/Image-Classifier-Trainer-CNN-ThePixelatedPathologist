@@ -11,7 +11,7 @@ class LeftPanel(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 5, 5, 5)
 
-        # --- Project ---
+       
         project_box = QtWidgets.QGroupBox("1. Project")
         project_layout = QtWidgets.QVBoxLayout(project_box)
         btn_layout = QtWidgets.QHBoxLayout()
@@ -34,7 +34,7 @@ class LeftPanel(QtWidgets.QWidget):
         project_layout.addLayout(btn_layout)
         project_layout.addLayout(path_layout)
 
-        # --- Model ---
+        
         model_box = QtWidgets.QGroupBox("2. Model")
         model_layout = QtWidgets.QFormLayout(model_box)
         model_layout.setSpacing(15)
@@ -46,14 +46,14 @@ class LeftPanel(QtWidgets.QWidget):
         self.finetune_cb = QtWidgets.QCheckBox("Fine-tune base model")
         self.mixed_cb = QtWidgets.QCheckBox("Use mixed precision")
 
-        # Better model filename defaults
+        
         self.best_name = QtWidgets.QLineEdit("model_best.keras")
         self.best_name.setToolTip("The model with best validation loss is saved here. Use this for inference.")
         
         self.final_name = QtWidgets.QLineEdit("model_final.keras")
         self.final_name.setToolTip("Backup model saved at the end of training (may be overfit).")
 
-        # Improved "Continue Training" section
+        
         pretrained_label = QtWidgets.QLabel("<b>Pre-trained Model (Optional)</b>")
         
         self.pretrained_combo = QtWidgets.QComboBox()
@@ -96,7 +96,7 @@ class LeftPanel(QtWidgets.QWidget):
         pretrained_row.addWidget(self.pretrained_browse_btn)
         pretrained_row.addWidget(pretrained_clear_btn)
         
-        # Connect combo to enable/disable controls
+        
         def _on_pretrained_mode_changed(idx):
             is_custom = idx > 0  # Anything other than "ImageNet"
             self.pretrained_path.setEnabled(is_custom)
@@ -113,7 +113,7 @@ class LeftPanel(QtWidgets.QWidget):
         
         self.pretrained_combo.currentIndexChanged.connect(_on_pretrained_mode_changed)
         
-        # Also update when project path changes
+        
         self.path_edit.textChanged.connect(
             lambda: _on_pretrained_mode_changed(self.pretrained_combo.currentIndex())
         )
@@ -127,7 +127,7 @@ class LeftPanel(QtWidgets.QWidget):
         model_layout.addRow("Mode:", self.pretrained_combo)
         model_layout.addRow("Model file:", pretrained_row)
 
-        # --- Hyperparameters ---
+        
         hyper_box = QtWidgets.QGroupBox("3. Hyperparameters")
         g = QtWidgets.QFormLayout(hyper_box)
         g.setSpacing(15)
@@ -168,7 +168,7 @@ class LeftPanel(QtWidgets.QWidget):
         g.addRow("Patience:", self.patience)
         g.addRow(self.use_class_weight)
         
-        # --- Split ---
+        
         split_box = QtWidgets.QGroupBox("4. Data Split")
         f = QtWidgets.QFormLayout(split_box)
         f.setSpacing(15)
@@ -192,7 +192,7 @@ class LeftPanel(QtWidgets.QWidget):
         f.addRow("Validation fraction:", self.val)
         f.addRow(self.info)
 
-        # --- Augmentation ---
+        
         aug_box = QtWidgets.QGroupBox("5. Augmentation")
         ag = QtWidgets.QFormLayout(aug_box)
         ag.setSpacing(15)
@@ -290,10 +290,10 @@ class LeftPanel(QtWidgets.QWidget):
             )
             return
         
-        # Sort by name
+        
         models.sort(key=lambda x: x[0])
         
-        # Show selection dialog
+        
         items = [m[0] for m in models]
         item, ok = QtWidgets.QInputDialog.getItem(
             self, "Select Model to Continue From",
