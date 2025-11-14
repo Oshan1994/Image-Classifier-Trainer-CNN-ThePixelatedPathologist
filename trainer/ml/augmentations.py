@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-# ----------------- Augmentation utils -----------------
 def _build_aug_layers(img_size, aug_cfg):
     """Build augmentation layers from configuration."""
     if not aug_cfg or not aug_cfg.get('enabled', False):
@@ -84,17 +83,17 @@ def _mixup(images, labels, alpha, num_classes):
     labels = tf.cast(labels, tf.int32)
     batch_size = tf.shape(images)[0]
     
-    # Sample mixing coefficient from Beta(alpha, alpha) - FIXED
+    
     lam = _sample_beta(alpha)
     lam = tf.maximum(lam, 1.0 - lam)  # Ensure lam >= 0.5 for stability
     
-    # Shuffle indices for mixing
+    
     index = tf.random.shuffle(tf.range(batch_size))
     
-    # Mix images
+    
     mixed_x = lam * images + (1.0 - lam) * tf.gather(images, index)
     
-    # Mix labels (soft labels)
+    
     y1 = tf.one_hot(labels, depth=num_classes, dtype=tf.float32)
     y2 = tf.one_hot(tf.gather(labels, index), depth=num_classes, dtype=tf.float32)
     mixed_y = lam * y1 + (1.0 - lam) * y2
@@ -121,40 +120,39 @@ def _cutmix_single(image, label, shuffled_image, shuffled_label, alpha, num_clas
     img_h = tf.shape(image)[0]
     img_w = tf.shape(image)[1]
     
-    # Sample lambda from Beta(alpha, alpha) - FIXED
+
     lam = _sample_beta(alpha)
     
-    # Compute box dimensions based on lambda
-    # Box area should be (1 - lambda) of total area
+  
     rw = tf.cast(tf.sqrt(1.0 - lam) * tf.cast(img_w, tf.float32), tf.int32)
     rh = tf.cast(tf.sqrt(1.0 - lam) * tf.cast(img_h, tf.float32), tf.int32)
     
-    # Random box center
+    
     rx = tf.random.uniform([], 0, img_w, dtype=tf.int32)
     ry = tf.random.uniform([], 0, img_h, dtype=tf.int32)
     
-    # Box coordinates (clipped to image bounds)
+    
     x1 = tf.clip_by_value(rx - rw // 2, 0, img_w)
     y1 = tf.clip_by_value(ry - rh // 2, 0, img_h)
     x2 = tf.clip_by_value(rx + rw // 2, 0, img_w)
     y2 = tf.clip_by_value(ry + rh // 2, 0, img_h)
     
-    # Create mask for this specific example
+    
     mask = tf.zeros((img_h, img_w, tf.shape(image)[-1]), dtype=tf.float32)
     
-    # Create rectangle mask
+    
     paddings = [[y1, img_h - y2], [x1, img_w - x2], [0, 0]]
     rect = tf.ones((y2 - y1, x2 - x1, tf.shape(image)[-1]), dtype=tf.float32)
     mask = mask + tf.pad(rect, paddings)
     
-    # Mix images using the mask
+    
     mixed = image * (1.0 - mask) + shuffled_image * mask
     
-    # Adjust lambda based on actual box area (important for label mixing)
+    
     box_area = tf.cast((x2 - x1) * (y2 - y1), tf.float32)
     lam_adj = 1.0 - (box_area / tf.cast(img_h * img_w, tf.float32))
     
-    # Mix labels based on adjusted lambda
+    
     y1_oh = tf.one_hot(label, depth=num_classes, dtype=tf.float32)
     y2_oh = tf.one_hot(shuffled_label, depth=num_classes, dtype=tf.float32)
     mixed_y = lam_adj * y1_oh + (1.0 - lam_adj) * y2_oh
@@ -185,13 +183,12 @@ def _cutmix(images, labels, alpha, num_classes):
     labels = tf.cast(labels, tf.int32)
     batch_size = tf.shape(images)[0]
     
-    # Shuffle indices for pairing
+    
     index = tf.random.shuffle(tf.range(batch_size))
     shuffled_images = tf.gather(images, index)
     shuffled_labels = tf.gather(labels, index)
     
-    # Apply CutMix to each image pair independently - FIXED
-    # This creates unique rectangles for each example in the batch
+ 
     mixed_images_labels = tf.map_fn(
         fn=lambda i: _cutmix_single(
             images[i], labels[i],
