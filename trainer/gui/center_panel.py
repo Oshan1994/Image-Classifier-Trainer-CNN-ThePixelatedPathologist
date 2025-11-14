@@ -66,11 +66,11 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         
         layout = QtWidgets.QVBoxLayout(self)
         
-        # Model selection area - NEW
+        
         selection_group = QtWidgets.QGroupBox("Select Models for Visualization")
         selection_layout = QtWidgets.QVBoxLayout(selection_group)
         
-        # Control buttons for model selection
+        
         button_layout = QtWidgets.QHBoxLayout()
         self.select_all_btn = QtWidgets.QPushButton("Select All")
         self.select_all_btn.setProperty("cssClass", "browse")
@@ -88,7 +88,7 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         button_layout.addStretch()
         button_layout.addWidget(self.selected_count_label)
         
-        # Scrollable list of model checkboxes
+        
         self.model_list_widget = QtWidgets.QListWidget()
         self.model_list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.NoSelection)
         self.model_list_widget.setMaximumHeight(150)
@@ -98,7 +98,7 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         selection_layout.addWidget(self.model_list_widget)
         layout.addWidget(selection_group)
         
-        # Control bar for chart options
+        
         control_layout = QtWidgets.QHBoxLayout()
         
         self.metric_selector = QtWidgets.QComboBox()
@@ -159,17 +159,17 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         else:
             self.selected_models.discard(model_name)
         
-        # Update the count label
+        
         self.selected_count_label.setText(f"{len(self.selected_models)} model(s) selected")
         
-        # Update visualization
+       
         self._update_visualization()
     
     def _update_model_list(self):
         """Update the list of available models with checkboxes."""
         self.model_list_widget.clear()
         
-        # Get all available model names
+        
         all_models = sorted(self.training_histories.keys())
         
         for model_name in all_models:
@@ -267,10 +267,10 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         ax = self.figure.add_subplot(111)
         show_val = self.show_val_cb.isChecked()
         
-        # Only plot selected models - ENHANCED
+        
         plotted_count = 0
         for idx, (run_name, history) in enumerate(self.training_histories.items()):
-            # Skip if not selected
+           
             if run_name not in self.selected_models:
                 continue
             
@@ -412,7 +412,7 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         
         ax = self.figure.add_subplot(111)
         
-        # Use dynamic target - find average of best accuracies, or use 0.70 if low
+    
         all_max_accs = []
         for history in self.training_histories.values():
             if 'val_accuracy' in history and history['val_accuracy']:
@@ -428,13 +428,13 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         
         convergence_data = []
         
-        # Only include selected models - ENHANCED
+        
         for run_name, history in self.training_histories.items():
-            # Skip if not selected
+            
             if run_name not in self.selected_models:
                 continue
             
-            # Try validation accuracy first, fall back to training accuracy
+            
             acc_key = 'val_accuracy' if 'val_accuracy' in history else 'accuracy'
             
             if acc_key in history and history[acc_key]:
@@ -463,19 +463,19 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         
         names, epochs, max_acc = zip(*convergence_data)
         
-        # Create scatter plot with different colors for each model
+        
         for i, (name, epoch, acc) in enumerate(convergence_data):
             color = self.colors[i % len(self.colors)]
             ax.scatter(epoch, acc, s=300, c=color, alpha=0.7,
                       edgecolors='white', linewidth=2, label=name)
             
-            # Annotate with model name
+            
             ax.annotate(name, (epoch, acc),
                        xytext=(8, 8), textcoords='offset points',
                        color='#e0e0e0', fontsize=10, fontweight='bold',
                        bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.3, edgecolor='none'))
         
-        # Add target line
+        
         ax.axhline(y=target_accuracy, color='#ff4444', linestyle='--',
                   linewidth=2, alpha=0.6, label=f'Target: {target_accuracy:.1%}')
         
@@ -486,21 +486,21 @@ class ComparisonVisualizationWidget(QtWidgets.QWidget):
         ax.set_facecolor('#222222')
         ax.grid(True, alpha=0.3, color='#555555', linestyle=':')
         
-        # Style spines
+        
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_color('#e0e0e0')
         ax.spines['left'].set_color('#e0e0e0')
         ax.tick_params(colors='#e0e0e0')
         
-        # Add legend
+        
         legend = ax.legend(loc='best', framealpha=0.9, fontsize=9)
         legend.get_frame().set_facecolor('#3c3c3c')
         legend.get_frame().set_edgecolor('#555555')
         for text in legend.get_texts():
             text.set_color('#e0e0e0')
         
-        # Add info text
+        
         info_text = f"Models: {len(convergence_data)} | Fastest: {min(epochs)} epochs"
         ax.text(0.02, 0.98, info_text, transform=ax.transAxes,
                fontsize=10, verticalalignment='top', color='#a0a0a0',
@@ -591,7 +591,7 @@ class CenterPanel(QtWidgets.QTabWidget):
         data_layout.addWidget(classes_box)
         data_layout.addWidget(control_widget)
 
-        # Tab 2: Live Metrics
+        
         plot_tab = QtWidgets.QWidget()
         plot_layout = QtWidgets.QVBoxLayout(plot_tab)
         if MATPLOTLIB_OK:
@@ -603,7 +603,7 @@ class CenterPanel(QtWidgets.QTabWidget):
             lbl.setStyleSheet("color:#a0a0a0;")
             plot_layout.addWidget(lbl)
 
-        # Tab 3: Final Metrics
+        
         metrics_tab = QtWidgets.QWidget()
         metrics_layout = QtWidgets.QHBoxLayout(metrics_tab)
         self.report_browser = QtWidgets.QTextBrowser()
@@ -620,12 +620,12 @@ class CenterPanel(QtWidgets.QTabWidget):
         metrics_splitter.setSizes([400,400])
         metrics_layout.addWidget(metrics_splitter)
 
-        # Tab 4: Model Comparison (ENHANCED)
+        
         compare_tab = QtWidgets.QWidget()
         compare_layout = QtWidgets.QVBoxLayout(compare_tab)
         self.compare_tabs = QtWidgets.QTabWidget()
         
-        # Sub-tab 1: Table view
+        
         table_widget = QtWidgets.QWidget()
         table_layout = QtWidgets.QVBoxLayout(table_widget)
         top_row = QtWidgets.QHBoxLayout()
@@ -644,7 +644,7 @@ class CenterPanel(QtWidgets.QTabWidget):
         table_layout.addLayout(top_row)
         table_layout.addWidget(self.compare_table)
         
-        # Sub-tab 2: Visualization
+        
         self.compare_visualization = ComparisonVisualizationWidget()
         self.compare_visualization.export_requested.connect(self.export_compare.emit)
         
@@ -782,5 +782,5 @@ class CenterPanel(QtWidgets.QTabWidget):
             self.compare_table.setItem(row, col_map["MCC"], QtWidgets.QTableWidgetItem(f"{row_data.get('MCC',0):.4f}"))
             self.compare_table.setItem(row, col_map["Artifacts"], QtWidgets.QTableWidgetItem(row_data.get("Artifacts","")))
         
-        # Update visualization
+        
         self.compare_visualization.set_comparison_data(data)
