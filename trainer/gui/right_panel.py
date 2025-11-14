@@ -51,7 +51,7 @@ class RightPanel(QtWidgets.QWidget):
         v.addLayout(row_img)
         v.addWidget(self.pred_result)
 
-        # ---------- Middle: Regularization & Advanced Tuning ----------
+        
         self.tune_group = QtWidgets.QGroupBox("Regularization & Advanced Tuning")
         form = QtWidgets.QFormLayout(self.tune_group)
 
@@ -104,7 +104,7 @@ class RightPanel(QtWidgets.QWidget):
         self.reg_enable.toggled.connect(_set_adv_enabled)
         _set_adv_enabled(self.reg_enable.isChecked())
 
-        # ------- Training Log -------
+        
         log_box = QtWidgets.QGroupBox("Training Log")
         log_layout = QtWidgets.QVBoxLayout(log_box)
         self.log = QtWidgets.QPlainTextEdit()
@@ -150,7 +150,7 @@ class RightPanel(QtWidgets.QWidget):
         self.pred_browse.setEnabled(enabled)
         self.pred_run.setEnabled(enabled)
 
-    # ---- Right-panel hyperparams API ----
+    
     def get_hparams(self) -> dict:
         return {
             'reg_enabled': bool(self.reg_enable.isChecked()),
